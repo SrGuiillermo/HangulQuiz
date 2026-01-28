@@ -1,11 +1,4 @@
-# Kana Quiz
-Kana Quiz made with React.js.
+# Hangul Quiz
+This is a fork of https://github.com/anzzstuff/kanaquiz vibecoded with Opus 4.5
 
-See live at https://kana.pro/
-
-
-Install deps: `npm install`
-
-Development: `npm start`
-
-Production: `npm run build`
+Same basic functionality but japanese hiragana/katana changed to korean hangul.
