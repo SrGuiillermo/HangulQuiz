@@ -74,10 +74,10 @@ class ChooseCharacters extends Component {
       this.addSelect(groupName);
   }
 
-  selectAll(whichKana, altOnly=false, similarOnly=false) {
-    const thisKana = kanaDictionary[whichKana];
+  selectAll(whichHangul, altOnly=false, similarOnly=false) {
+    const thisHangul = kanaDictionary[whichHangul];
     let newSelectedGroups = this.state.selectedGroups.slice();
-    Object.keys(thisKana).forEach(groupName => {
+    Object.keys(thisHangul).forEach(groupName => {
       if(!this.isSelected(groupName) && (
         (altOnly && groupName.endsWith('_a')) ||
         (similarOnly && groupName.endsWith('_s')) ||
@@ -88,11 +88,11 @@ class ChooseCharacters extends Component {
     this.setState({errMsg: '', selectedGroups: newSelectedGroups});
   }
 
-  selectNone(whichKana, altOnly=false, similarOnly=false) {
+  selectNone(whichHangul, altOnly=false, similarOnly=false) {
     let newSelectedGroups = [];
     this.state.selectedGroups.forEach(groupName => {
       let mustBeRemoved = false;
-      Object.keys(kanaDictionary[whichKana]).forEach(removableGroupName => {
+      Object.keys(kanaDictionary[whichHangul]).forEach(removableGroupName => {
         if(removableGroupName === groupName && (
           (altOnly && groupName.endsWith('_a')) ||
           (similarOnly && groupName.endsWith('_s')) ||
@@ -106,55 +106,56 @@ class ChooseCharacters extends Component {
     this.setState({selectedGroups: newSelectedGroups});
   }
 
-  toggleAlternative(whichKana, postfix) {
+  toggleAlternative(whichHangul, postfix) {
     let show = postfix == '_a' ? this.state.showAlternatives : this.state.showSimilars;
-    const idx = show.indexOf(whichKana);
+    const idx = show.indexOf(whichHangul);
     if(idx >= 0)
       show.splice(idx, 1);
     else
-      show.push(whichKana)
+      show.push(whichHangul)
     if(postfix == '_a')
       this.setState({showAlternatives: show});
     if(postfix == '_s')
       this.setState({showSimilars: show});
   }
 
-  getSelectedAlternatives(whichKana, postfix) {
+  getSelectedAlternatives(whichHangul, postfix) {
+    const prefix = whichHangul == 'vowels' ? 'v_' : (whichHangul == 'consonants' ? 'c_' : 's_');
     return this.state.selectedGroups.filter(groupName => {
-      return groupName.startsWith(whichKana == 'hiragana' ? 'h_' : 'k_') &&
+      return groupName.startsWith(prefix) &&
         groupName.endsWith(postfix);
     }).length;
   }
 
-  getAmountOfAlternatives(whichKana, postfix) {
-    return Object.keys(kanaDictionary[whichKana]).filter(groupName => {
+  getAmountOfAlternatives(whichHangul, postfix) {
+    return Object.keys(kanaDictionary[whichHangul]).filter(groupName => {
       return groupName.endsWith(postfix);
     }).length;
   }
 
-  alternativeToggleRow(whichKana, postfix, show) {
+  alternativeToggleRow(whichHangul, postfix, show) {
     let checkBtn = "glyphicon glyphicon-small glyphicon-"
     let status;
-    if(this.getSelectedAlternatives(whichKana, postfix) >= this.getAmountOfAlternatives(whichKana, postfix))
+    if(this.getSelectedAlternatives(whichHangul, postfix) >= this.getAmountOfAlternatives(whichHangul, postfix))
       status = 'check';
-    else if(this.getSelectedAlternatives(whichKana, postfix) > 0)
+    else if(this.getSelectedAlternatives(whichHangul, postfix) > 0)
       status = 'check half';
     else
       status = 'unchecked'
     checkBtn += status
 
     return <div
-      key={'alt_toggle_' + whichKana + postfix}
-      onClick={() => this.toggleAlternative(whichKana, postfix)}
+      key={'alt_toggle_' + whichHangul + postfix}
+      onClick={() => this.toggleAlternative(whichHangul, postfix)}
       className="choose-row"
     >
       <span
         className={checkBtn}
         onClick={ e => {
           if(status == 'check')
-            this.selectNone(whichKana, postfix == '_a', postfix == '_s');
+            this.selectNone(whichHangul, postfix == '_a', postfix == '_s');
           else if(status == 'check half' || status == 'unchecked')
-            this.selectAll(whichKana, postfix == '_a', postfix == '_s');
+            this.selectAll(whichHangul, postfix == '_a', postfix == '_s');
           e.stopPropagation();
         }}
       ></span>
@@ -163,20 +164,18 @@ class ChooseCharacters extends Component {
           : <span className="toggle-caret">&#9660;</span>
       }
       {
-        postfix == '_a' ? 'Alternative characters (ga · ba · kya..)' :
+        postfix == '_a' ? 'Advanced characters (compound vowels, double consonants, syllables..)' :
           'Look-alike characters'
       }
     </div>
   }
 
-  showGroupRows(whichKana, showAlternatives, showSimilars = false) {
-    const thisKana = kanaDictionary[whichKana];
+  showGroupRows(whichHangul, showAlternatives, showSimilars = false) {
+    const thisHangul = kanaDictionary[whichHangul];
     let rows = [];
-    Object.keys(thisKana).forEach((groupName, idx) => {
-      if(groupName == "h_group11_a" || groupName == "k_group13_a")
-        rows.push(this.alternativeToggleRow(whichKana, "_a", showAlternatives));
-      if(groupName == "k_group11_s")
-        rows.push(this.alternativeToggleRow(whichKana, "_s", showSimilars));
+    Object.keys(thisHangul).forEach((groupName, idx) => {
+      if(groupName == "v_group3_a" || groupName == "c_group4_a" || groupName == "s_group7_a")
+        rows.push(this.alternativeToggleRow(whichHangul, "_a", showAlternatives));
 
       if((!groupName.endsWith("a") || showAlternatives) &&
         (!groupName.endsWith("s") || showSimilars)) {
@@ -184,7 +183,7 @@ class ChooseCharacters extends Component {
           key={idx}
           groupName={groupName}
           selected={this.isSelected(groupName)}
-          characters={thisKana[groupName].characters}
+          characters={thisHangul[groupName].characters}
           handleToggleSelect={this.toggleSelect}
         />);
       }
@@ -208,39 +207,52 @@ class ChooseCharacters extends Component {
           <div className="col-xs-12">
             <div className="panel panel-default">
               <div className="panel-body welcome">
-                <h4>Welcome to Kana Pro!</h4>
-                <p>Please choose the groups of characters that you'd like to be studying.</p>
+                <h4>Welcome to Hangul Pro!</h4>
+                <p>Please choose the groups of Korean characters that you'd like to be studying.</p>
               </div>
             </div>
           </div>
         </div>
         <div className="row">
-          <div className="col-sm-6">
+          <div className="col-sm-4">
             <div className="panel panel-default">
-              <div className="panel-heading">Hiragana · ひらがな</div>
+              <div className="panel-heading">Vowels · 모음</div>
               <div className="panel-body selection-areas">
-                {this.showGroupRows('hiragana', this.state.showAlternatives.indexOf('hiragana') >= 0)}
+                {this.showGroupRows('vowels', this.state.showAlternatives.indexOf('vowels') >= 0)}
               </div>
               <div className="panel-footer text-center">
-                <a href="javascript:;" onClick={()=>this.selectAll('hiragana')}>All</a> &nbsp;&middot;&nbsp; <a href="javascript:;"
-                  onClick={()=>this.selectNone('hiragana')}>None</a>
-                &nbsp;&middot;&nbsp; <a href="javascript:;" onClick={()=>this.selectAll('hiragana', true)}>All alternative</a>
-                &nbsp;&middot;&nbsp; <a href="javascript:;" onClick={()=>this.selectNone('hiragana', true)}>No alternative</a>
+                <a href="javascript:;" onClick={()=>this.selectAll('vowels')}>All</a> &nbsp;&middot;&nbsp; <a href="javascript:;"
+                  onClick={()=>this.selectNone('vowels')}>None</a>
+                &nbsp;&middot;&nbsp; <a href="javascript:;" onClick={()=>this.selectAll('vowels', true)}>All advanced</a>
+                &nbsp;&middot;&nbsp; <a href="javascript:;" onClick={()=>this.selectNone('vowels', true)}>No advanced</a>
               </div>
             </div>
           </div>
-          <div className="col-sm-6">
+          <div className="col-sm-4">
             <div className="panel panel-default">
-              <div className="panel-heading">Katakana · カタカナ</div>
+              <div className="panel-heading">Consonants · 자음</div>
               <div className="panel-body selection-areas">
-                {this.showGroupRows('katakana', this.state.showAlternatives.indexOf('katakana') >= 0, this.state.showSimilars.indexOf('katakana') >= 0)}
+                {this.showGroupRows('consonants', this.state.showAlternatives.indexOf('consonants') >= 0)}
               </div>
               <div className="panel-footer text-center">
-                <a href="javascript:;" onClick={()=>this.selectAll('katakana')}>All</a> &nbsp;&middot;&nbsp; <a href="javascript:;"
-                  onClick={()=>this.selectNone('katakana')}>None
-                </a>
-                &nbsp;&middot;&nbsp; <a href="javascript:;" onClick={()=>this.selectAll('katakana', true)}>All alternative</a>
-                &nbsp;&middot;&nbsp; <a href="javascript:;" onClick={()=>this.selectNone('katakana', true)}>No alternative</a>
+                <a href="javascript:;" onClick={()=>this.selectAll('consonants')}>All</a> &nbsp;&middot;&nbsp; <a href="javascript:;"
+                  onClick={()=>this.selectNone('consonants')}>None</a>
+                &nbsp;&middot;&nbsp; <a href="javascript:;" onClick={()=>this.selectAll('consonants', true)}>All advanced</a>
+                &nbsp;&middot;&nbsp; <a href="javascript:;" onClick={()=>this.selectNone('consonants', true)}>No advanced</a>
+              </div>
+            </div>
+          </div>
+          <div className="col-sm-4">
+            <div className="panel panel-default">
+              <div className="panel-heading">Syllables · 음절</div>
+              <div className="panel-body selection-areas">
+                {this.showGroupRows('syllables', this.state.showAlternatives.indexOf('syllables') >= 0)}
+              </div>
+              <div className="panel-footer text-center">
+                <a href="javascript:;" onClick={()=>this.selectAll('syllables')}>All</a> &nbsp;&middot;&nbsp; <a href="javascript:;"
+                  onClick={()=>this.selectNone('syllables')}>None</a>
+                &nbsp;&middot;&nbsp; <a href="javascript:;" onClick={()=>this.selectAll('syllables', true)}>All advanced</a>
+                &nbsp;&middot;&nbsp; <a href="javascript:;" onClick={()=>this.selectNone('syllables', true)}>No advanced</a>
               </div>
             </div>
           </div>

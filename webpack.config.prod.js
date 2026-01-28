@@ -1,5 +1,4 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const webpack = require('webpack');
 const path = require('path');
 const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
 
@@ -9,18 +8,21 @@ module.exports = {
     main: './src/index.js'
   },
   output: {
-    filename: '[name].[chunkhash].js',
-    chunkFilename: '[name].[chunkhash].bundle.js',
+    filename: '[name].[contenthash].js',
+    chunkFilename: '[name].[contenthash].bundle.js',
     path: path.resolve(__dirname, 'dist'),
+    clean: true
   },
   resolve: {
     extensions: ['.js', '.jsx']
   },
+  optimization: {
+    moduleIds: 'deterministic'
+  },
   plugins: [
-    new webpack.HashedModuleIdsPlugin(),
     new HtmlWebpackPlugin({
       template: './index.html',
-      minify: { collapseWhitespace: true, removeCommecnts: true },
+      minify: { collapseWhitespace: true, removeComments: true },
       inject: false
     }),
     new WorkboxWebpackPlugin.InjectManifest({
@@ -47,11 +49,20 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
-              importLoaders: 1
+              importLoaders: 2
             }
           },
           {
             loader: 'postcss-loader'
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              api: 'modern',
+              sassOptions: {
+                silenceDeprecations: ['legacy-js-api']
+              }
+            }
           }
         ]
       },
@@ -60,12 +71,8 @@ module.exports = {
         use: ['style-loader', 'css-loader']
       },
       {
-        test: /\.(png|jpg|svg|woff|woff2)?(\?v=\d+.\d+.\d+)?$/,
-        loader: 'url-loader?limit=25000'
-      }, 
-      {
-        test: /\.(eot|ttf)$/,
-        loader: 'file-loader'
+        test: /\.(png|jpg|svg|woff|woff2|eot|ttf)?(\?v=\d+.\d+.\d+)?$/,
+        type: 'asset/resource'
       }
     ]
   }

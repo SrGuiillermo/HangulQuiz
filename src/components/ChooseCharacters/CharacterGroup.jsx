@@ -30,7 +30,7 @@ class CharacterGroup extends Component {
       className={
         'choose-row'
           + (this.props.groupName.endsWith('_a') || this.props.groupName.endsWith('_s') ? ' alt-row' : '')
-          + (['h_group16_a','k_group18_a','k_group29_a'].includes(this.props.groupName) ? ' divider-row' : '')
+          + (['v_group4_a','s_group10_a','s_group13_a'].includes(this.props.groupName) ? ' divider-row' : '')
       }
       onClick={() => {
         this.props.handleToggleSelect(this.props.groupName);

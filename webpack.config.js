@@ -28,11 +28,20 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
-              importLoaders: 1
+              importLoaders: 2
             }
           },
           {
             loader: 'postcss-loader'
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              api: 'modern',
+              sassOptions: {
+                silenceDeprecations: ['legacy-js-api']
+              }
+            }
           }
         ]
       },
@@ -41,12 +50,8 @@ module.exports = {
         use: ['style-loader', 'css-loader']
       },
       {
-        test: /\.(png|jpg|svg|woff|woff2)?(\?v=\d+.\d+.\d+)?$/,
-        loader: 'url-loader?limit=25000'
-      }, 
-      {
-        test: /\.(eot|ttf)$/,
-        loader: 'file-loader'
+        test: /\.(png|jpg|svg|woff|woff2|eot|ttf)?(\?v=\d+.\d+.\d+)?$/,
+        type: 'asset/resource'
       }
     ]
   }
